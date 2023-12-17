@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <arch/i386/tmtty.h>
 #include <arch/i386/ps2_controller.h>
+#include <dev/ps2kbd.h>
 #include <arch/i386/pic.h>
 #include <io.h>
 
@@ -12,10 +13,9 @@ extern "C" void exception_handler(int e) {
 	printf("Exception\n");
 }
 
+#define PS2_DATA 0x60
 extern "C" void ps2_handler() {
-    printf("b");
-    inb(0x60);
-    printf("a");
+    keyboard_write(inb(PS2_DATA));
 
     pic_send_eoi(1);
 }
