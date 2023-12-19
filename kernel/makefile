@@ -1,4 +1,5 @@
 # Kernel makefile
+#absolute hell
 
 ifndef GAS
 	GAS = i686-elf-as
@@ -39,9 +40,9 @@ GASFILES := $(wildcard *.s)
 CRTBEGIN := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtbegin.o)
 CRTEND := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtend.o)
 
-OBJECTS := $(C_SOURCES:.c=.o)
-OBJECTS += ${CPP_SOURCES:.cpp=.o}
-OBJECTS += ${ASMFILES:.asm=.o}
+OBJECTS := $(patsubst %.c,%.o,$(C_SOURCES))
+OBJECTS += $(patsubst %.cpp,%.o,$(CPP_SOURCES))
+OBJECTS += $(patsubst %.asm,%.o,$(ASMFILES))
 
 LINKLST := crti.o
 LINKLST += $(CRTBEGIN)
@@ -58,15 +59,16 @@ kernel.bin: ${OBJECTS}
 	$(info [INFO] Linking kernel)
 	$(CXX) ${LDFLAGS} -o ${PREFIX}/kernel.bin $(LINKLST)
 
-%.o: %.cpp ${HEADERS}
+%.o: %.cpp
 	$(info [INFO] Compiling $<)
 	$(CXX) ${CXXFLAGS} -c $< -o $@
 
-%.o: %.c $(HEADERS)
+%.o: %.c
+	$(info [INFO] Compiling $<)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 %.o: %.asm
-	$(info [INFO] Assembling assembly)
+	$(info [INFO] Assembling $<)
 	$(NASM) $< -felf32 -o $@ -g
 
 crti.o: 
