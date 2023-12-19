@@ -5,5 +5,3 @@ isodir/boot/grub and sysroot/ should be created before building for the first ti
 requires an `i686-elf` cross compiler as well as nasm and gnumake. can only be built on linux and wsl.
 
 to build use `make`
-
-the cmake does nothing cause i have no idea how to get that to work
