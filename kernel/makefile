@@ -44,12 +44,17 @@ OBJECTS := $(patsubst %.c,%.o,$(C_SOURCES))
 OBJECTS += $(patsubst %.cpp,%.o,$(CPP_SOURCES))
 OBJECTS += $(patsubst %.asm,%.o,$(ASMFILES))
 
+DEPFILES := $(patsubst %.c,%.d,$(SRCFILES))
+DEPFILES += $(patsubst %.cpp,%.d,$(SRCFILES))
+
 LINKLST := crti.o
 LINKLST += $(CRTBEGIN)
 LINKLST += $(OBJECTS)
 LINKLST += $(LIBS)
 LINKLST += $(CRTEND)
 LINKLST += crtn.o
+
+-include $(DEPFILES)
 
 .PHONY: all crt clean
 
@@ -61,11 +66,11 @@ kernel.bin: ${OBJECTS}
 
 %.o: %.cpp
 	$(info [INFO] Compiling $<)
-	$(CXX) ${CXXFLAGS} -c $< -o $@
+	$(CXX) ${CXXFLAGS} -MMD -MP -c $< -o $@
 
 %.o: %.c
 	$(info [INFO] Compiling $<)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
 %.o: %.asm
 	$(info [INFO] Assembling $<)
@@ -78,8 +83,8 @@ crtn.o:
 	$(NASM) arch/$(ARCH)/crtn.asm -felf32 -o $@
 
 install-headers:
-	cp -r --preserve=timestamps include $(SYSROOT)/usr/include
+	cp -r --preserve=timestamps include/. $(SYSROOT)/usr/include
 
 clean:
 	$(info [INFO] Cleaning)
-	rm ${OBJECTS} crti.o crtn.o
+	rm ${OBJECTS} ${DEPFILES} crti.o crtn.o

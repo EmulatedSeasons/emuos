@@ -3,7 +3,7 @@ boot: cdrom
 
 megs: 256
 
-#display_library: win32, options="gui_debug"
+display_library: win32, options="gui_debug"
 
 vga: extension=vbe
 

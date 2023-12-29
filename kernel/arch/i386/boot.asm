@@ -30,6 +30,12 @@ _start:
     ; setup stack
     mov esp, stack_top
 
+    ; get multiboot header data (for memory map)
+    extern multiboot_main
+    push eax
+    push ebx
+    call multiboot_main
+
     extern _init
     call _init
 

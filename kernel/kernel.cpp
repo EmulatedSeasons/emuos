@@ -18,12 +18,13 @@
 
 extern "C" void kernel_main(void) {
     // Initialize terminal
-    terminal_initialize();
+    //terminal_initialize();
 
-    initialize_ps2_controller();
-    keyboard_init();
+    //initialize_ps2_controller();
+    //keyboard_init();
 
     printf("Hello world!\n");
-    printf("among");
+    printf("among\n");
     printf("balls\n");
+    printf("a%db", 1);
 }
