@@ -16,11 +16,11 @@ ASMFLAGS	= -felf32
 
 .PHONY: all kernel.bin grub multiboot_test clean
 
-all: kernel.bin grub
+all: libck.a kernel.bin grub
 
-#libc.a:
-#	$(info [INFO] Building libc)
-#	$(MAKE) -C ./libc/ ARCH=$(ARCH) PREFIX=$(PWD) CC=$(CC) CXX=$(CXX) LD=$(LD) NASM=$(NASM) SYSROOT=$(SYSROOT)
+libck.a:
+	$(info [INFO] Building libck)
+	$(MAKE) -C ./libs/libck/ ARCH=$(ARCH) PREFIX=$(PWD) CC=$(CC) CXX=$(CXX) LD=$(LD) NASM=$(NASM) SYSROOT=$(SYSROOT)
 
 kernel.bin:
 	$(info [INFO] Building kernel)
@@ -35,11 +35,16 @@ grub: kernel.bin grub.cfg
 qemu: grub
 	$(QEMU) -no-shutdown -no-reboot --serial stdio -s -m 512 -hda $(OS_NAME).iso
 
-install: install-headers
+install: install-headers install-libraries
 
 install-headers:
 	$(MAKE) -C ./kernel/ install-headers SYSROOT=$(SYSROOT)
+	$(MAKE) -C ./libs/libck/ install-headers SYSROOT=$(SYSROOT)
+
+install-libraries:
+		$(MAKE) -C ./libs/libck/ install-lib SYSROOT=$(SYSROOT)
 
 clean:
 	-@$(MAKE) -C ./kernel/ clean SYSROOT=$(SYSROOT)
-	-@$(RM) $(wildcard *.bin)
+	-@$(MAKE) -C ./libs/libck/ clean SYSROOT=$(SYSROOT)
+	-@$(RM) $(wildcard *.bin *.a)
