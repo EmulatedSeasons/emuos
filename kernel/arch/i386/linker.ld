@@ -5,6 +5,9 @@ SECTIONS
 {
     . = 1M;
 
+    /* Used to get the beginning and end address of the kernel */
+    _begin = .;
+
     /* code. multiboot header comes first */
     .text BLOCK(4K) : ALIGN(4K)
     {
@@ -30,4 +33,6 @@ SECTIONS
         *(COMMON)
         *(.bss)
     }
+
+    _end = .;
 }

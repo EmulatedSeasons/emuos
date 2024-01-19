@@ -30,10 +30,19 @@ _start:
     ; setup stack
     mov esp, stack_top
 
-    ; get multiboot header data (for memory map)
-    extern multiboot_main
+    ; push the multiboot header data into the stack for later use
     push eax
     push ebx
+
+    ; setup paging (to map kernel to the higher half)
+    ;mov eax, 0
+    ;mov cr3, eax
+    ;mov eax, cr0
+    ;or eax, 0x80000001
+    ;mov cr0, eax
+
+    ; get multiboot header data (for memory map)
+    extern multiboot_main
     call multiboot_main
 
     extern _init

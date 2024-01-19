@@ -10,7 +10,7 @@
 extern "C" void exception_handler(int e) {
     //unsigned char errorcode[2]{((unsigned char) e) + 48};
     //terminal_initialize();
-	printf("Exception\n");
+	printf("Exception %x\n", e);
 }
 
 #define PS2_DATA 0x60

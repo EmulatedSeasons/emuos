@@ -7,14 +7,10 @@
 #include <arch/i386/ps2_controller.h>
 #include <dev/ps2kbd.h>
 
-// compiler and target check
-#if defined(__linux__)
-#error "you're not using a cross compiler"
-#endif
+// linker symbols
+unsigned int _begin;
+unsigned int _end;
 
-#if !defined(__i386__)
-#error "needs to be compiled using an ix86-elf cross compiler"
-#endif
 
 extern "C" void kernel_main(void) {
     // Initialize terminal
@@ -24,7 +20,6 @@ extern "C" void kernel_main(void) {
     //keyboard_init();
 
     printf("Hello world!\n");
-    printf("among\n");
-    printf("balls\n");
-    printf("a%db", 1);
+    printf("a%db\n", 1);
+    printf("_begin: %x, _end: %x", &_begin, &_end);
 }

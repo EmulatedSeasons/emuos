@@ -15,7 +15,6 @@ static bool print(const char* data, size_t length) {
 
 // for %d and %x.
 static const char* itoa(unsigned int num, char* str, unsigned int base) {
-	asm("xchgw %bx, %bx");
 	int cou = 0; // nt
 
     if (num == 0) { // 0

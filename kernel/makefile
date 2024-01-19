@@ -55,7 +55,7 @@ LINKLST += crtn.o
 
 -include $(DEPFILES)
 
-.PHONY: all crt clean
+.PHONY: all crt clean kernel.bin
 
 all: crti.o crtn.o kernel.bin
 

@@ -8,6 +8,7 @@ build/
 *.iso
 *.o
 *.d
+*.a
 
 # i have no idea what this is for
 bx_enh_dbg.ini
