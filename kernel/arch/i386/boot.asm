@@ -22,6 +22,13 @@ stack_bottom:
 resb 16384 ; 16 KiB
 stack_top:
 
+; temporary paging tables
+align 4
+boot_page_directory:
+    resb 4096
+boot_page_table:
+    resb 4096
+
 
 section .text
 global _start:function (_start.end - _start)
@@ -34,19 +41,12 @@ _start:
     push eax
     push ebx
 
-    ; setup paging (to map kernel to the higher half)
-    ;mov eax, 0
-    ;mov cr3, eax
-    ;mov eax, cr0
-    ;or eax, 0x80000001
-    ;mov cr0, eax
-
     ; get multiboot header data (for memory map)
-    extern multiboot_main
-    call multiboot_main
+    ;extern multiboot_main
+    ;call multiboot_main
 
-    extern _init
-    call _init
+    ;extern _init
+    ;Scall _init
 
     lgdt [gdt_descriptor]
     jmp 0x08:.gdt_jmp
@@ -61,6 +61,15 @@ _start:
 	jmp .gdt_jmp2
 
 .gdt_jmp2:
+
+    
+
+    ; setup paging (to map kernel to the higher half)
+    ;mov eax, 0
+    ;mov cr3, eax
+    ;mov eax, cr0
+    ;or eax, 0x80000001
+    ;mov cr0, eax
 
     ; setup idt
     extern idt_setup

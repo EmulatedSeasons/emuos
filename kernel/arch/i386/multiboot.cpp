@@ -7,6 +7,7 @@
 // gets the memory map and stuff
 extern "C" void multiboot_main(multiboot_info_t* mbd, uint32_t magic) {
     terminal_initialize();
+    //printf("multiboot struc addr: %x\n", mbd);
     if (magic != MULTIBOOT_BOOTLOADER_MAGIC) {
         printf("Invalid multiboot magic number\n");
         abort();

@@ -21,5 +21,6 @@ extern "C" void kernel_main(void) {
 
     printf("Hello world!\n");
     printf("a%db\n", 1);
-    printf("_begin: %x, _end: %x", &_begin, &_end);
+    printf("_begin: %x, _end: %x\n", &_begin, &_end);
+    //printf("kernel_main addr: %x\n", &kernel_main);
 }
