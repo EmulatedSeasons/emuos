@@ -61,9 +61,6 @@ _start:
 	jmp .gdt_jmp2
 
 .gdt_jmp2:
-
-    
-
     ; setup paging (to map kernel to the higher half)
     ;mov eax, 0
     ;mov cr3, eax
