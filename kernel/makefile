@@ -1,25 +1,18 @@
 # Kernel makefile
 
-ifndef GAS
-	GAS = i686-elf-as
-endif
-
 ifndef CFLAGS
 	CFLAGS = -ffreestanding -Wall -Wextra -g -std=gnu99 -O2 -Iinclude
-	CFLAGS += --sysroot="$(SYSROOT)"
 	CFLAGS += -isystem="/usr/include"
 endif
 
 ifndef CXXFLAGS
 	CXXFLAGS = -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -D__is_kernel -g -O2 -Iinclude
 	CXXFLAGS += -Iinclude
-	CXXFLAGS += --sysroot="$(SYSROOT)"
 	CXXFLAGS += -isystem="/usr/include"
 endif
 
 ifndef LDFLAGS
 	LDFLAGS = -T arch/$(ARCH)/linker.ld -ffreestanding -g -O2 -Iinclude
-	LDFLAGS += --sysroot="$(SYSROOT)"
 	LDFLAGS += -isystem="/usr/include"
 endif
 

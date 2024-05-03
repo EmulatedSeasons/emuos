@@ -1,16 +1,16 @@
 # The makefile
 
 OS_NAME		:= emuos
-ARCH		= i386
+ARCH		?= x86_64
 export SYSROOT = $(PWD)/sysroot
 
 # Variables for easy access of tools like gcc and nasm
-export CC		= i686-elf-gcc
-export CXX		= i686-elf-g++
-export LD		= i686-elf-ld 
+export CC		= $(ARCH)-elf-gcc
+export CXX		= $(ARCH)-elf-g++
+export LD		= $(ARCH)-elf-ld 
 export NASM		= nasm
-QEMU		= qemu-system-i386
-ASMFLAGS	= -felf32
+QEMU		= qemu-system-x86_64
+#ASMFLAGS	= -felf32
 #CXXFLAGS 	:= -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti
 #LDFLAGS	:= -ffreestanding -O2 -nostdlib 
 
