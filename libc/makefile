@@ -50,9 +50,9 @@ LINKLST += $(LIBS)
 
 .PHONY: all install-headers install-lib clean
 
-all: libck.a install-headers install-lib
+all: libc.a install-lib
 
-libck.a: ${OBJECTS}
+libc.a: ${OBJECTS}
 	$(info [INFO] Linking $<)
 	$(AR) rcs $@ $(OBJECTS)
 

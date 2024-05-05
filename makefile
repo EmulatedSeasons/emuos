@@ -7,30 +7,33 @@ export SYSROOT = $(PWD)/sysroot
 # Variables for easy access of tools like gcc and nasm
 export CC		= $(ARCH)-elf-gcc
 export CXX		= $(ARCH)-elf-g++
-export LD		= $(ARCH)-elf-ld 
+export AR		= $(ARCH)-elf-ar
 export NASM		= nasm
-QEMU		= qemu-system-x86_64
+QEMU			= qemu-system-x86_64
 #ASMFLAGS	= -felf32
 #CXXFLAGS 	:= -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti
 #LDFLAGS	:= -ffreestanding -O2 -nostdlib 
 
-.PHONY: all kernel.bin grub multiboot_test clean
+.PHONY: all grub clean build-all
 
-all: libck.a kernel.bin grub
+all: build-all grub
 
-libck.a:
-	$(info [INFO] Building libck)
-	$(MAKE) -C ./libs/libck/ ARCH=$(ARCH) PREFIX=$(PWD)
+build-all: kernel/kernel.bin libc.a
 
-kernel.bin:
+libc/libc.a: install-headers
+	$(info [INFO] Building libc)
+	$(MAKE) -C ./libc/ ARCH=$(ARCH) PREFIX=$(PWD)
+
+kernel/kernel.bin: libc/libc.a install-headers
 	$(info [INFO] Building kernel)
 	$(MAKE) -C ./kernel/ ARCH=$(ARCH) PREFIX=$(PWD)
 
-grub: kernel.bin grub.cfg
-	grub-file --is-x86-multiboot $<
-	cp kernel.bin isodir/boot
-	cp grub.cfg isodir/boot/grub
-	grub-mkrescue -o $(OS_NAME).iso isodir
+grub: build-all grub.cfg
+	xorriso -as mkisofs -b boot/limine/limine-bios-cd.bin \
+        -no-emul-boot -boot-load-size 4 -boot-info-table \
+        --efi-boot boot/limine/limine-uefi-cd.bin \
+        -efi-boot-part --efi-boot-image --protective-msdos-label \
+        isodir -o emuos.iso
 
 qemu: grub
 	$(QEMU) -no-shutdown -no-reboot --serial stdio -s -m 512 -hda $(OS_NAME).iso
@@ -39,12 +42,12 @@ install: install-headers install-libraries
 
 install-headers:
 	$(MAKE) -C ./kernel/ install-headers
-	$(MAKE) -C ./libs/libck/ install-headers
+	$(MAKE) -C ./libs/libc/ install-headers
 
 install-libraries:
-		$(MAKE) -C ./libs/libck/ install-lib
+	$(MAKE) -C ./libs/libc/ install-lib
 
 clean:
 	-@$(MAKE) -C ./kernel/ clean
-	-@$(MAKE) -C ./libs/libck/ clean
+	-@$(MAKE) -C ./libs/libc/ clean
 	-@$(RM) $(wildcard *.bin *.a)

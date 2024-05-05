@@ -1,19 +1,15 @@
 # Kernel makefile
 
-ifndef CFLAGS
-	CFLAGS = -ffreestanding -Wall -Wextra -g -std=gnu99 -O2 -Iinclude
-	CFLAGS += -isystem="/usr/include"
-endif
+CFLAGS := -ffreestanding -Wall -Wextra -g -std=gnu99 -O2 -Iinclude
+CXXFLAGS := -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -g -O2 -Iinclude
+LDFLAGS := -T arch/$(ARCH)/linker.ld -ffreestanding -g -O2 -Iinclude
+ASMFLAGS :=
 
-ifndef CXXFLAGS
-	CXXFLAGS = -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -D__is_kernel -g -O2 -Iinclude
-	CXXFLAGS += -Iinclude
-	CXXFLAGS += -isystem="/usr/include"
-endif
-
-ifndef LDFLAGS
-	LDFLAGS = -T arch/$(ARCH)/linker.ld -ffreestanding -g -O2 -Iinclude
-	LDFLAGS += -isystem="/usr/include"
+ifeq ($(ARCH),x86_64)
+CFLAGS += -mno-red-zone
+CXXFLAGS += -mno-red-zone
+LDFLAGS += -mno-red-zone
+ASMFLAGS += -felf64
 endif
 
 ifndef SYSROOT
@@ -21,14 +17,13 @@ ifndef SYSROOT
 endif
 
 
-LIBS = -nostdlib -lgcc -lck
+LIBS = -nostdlib -lck -lgcc
 
 #Find all the source files
 C_SOURCES := $(shell find $(PWD)/kernel -type f -name '*.c')
 CPP_SOURCES := $(shell find $(PWD)/kernel -type f -name '*.cpp')
 HEADERS := $(shell find $(PWD) -type f -name '*.h')
 ASMFILES := $(shell find $(PWD) -type f -name '*.asm' ! -name 'crti.asm' ! -name 'crtn.asm')
-GASFILES := $(wildcard *.s)
 CRTBEGIN := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtbegin.o)
 CRTEND := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtend.o)
 
@@ -54,7 +49,7 @@ all: crti.o crtn.o kernel.bin
 
 kernel.bin: ${OBJECTS}
 	$(info [INFO] Linking kernel)
-	$(CXX) ${LDFLAGS} -o ${PREFIX}/kernel.bin $(LINKLST)
+	$(CXX) ${LDFLAGS} -o $@ $(LINKLST)
 
 %.o: %.cpp
 	$(info [INFO] Compiling $<)
@@ -66,13 +61,13 @@ kernel.bin: ${OBJECTS}
 
 %.o: %.asm
 	$(info [INFO] Assembling $<)
-	$(NASM) $< -felf32 -o $@ -g
+	$(NASM) $< $(ASMFLAGS) -o $@ -g
 
 crti.o: 
-	$(NASM) arch/$(ARCH)/crti.asm -felf32 -o $@
+	$(NASM) arch/$(ARCH)/crti.asm $(ASMFLAGS) -o $@
 
 crtn.o: 
-	$(NASM) arch/$(ARCH)/crtn.asm -felf32 -o $@
+	$(NASM) arch/$(ARCH)/crtn.asm $(ASMFLAGS) -o $@
 
 install-headers:
 	cp -r --preserve=timestamps include/. $(SYSROOT)/usr/include
