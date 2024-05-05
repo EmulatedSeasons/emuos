@@ -1,6 +1,7 @@
 # directories that have to exist but shouldn't be added to git
 sysroot/
 build/
+isodir/
 
 # compiled files files
 *.bin
