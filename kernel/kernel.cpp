@@ -1,7 +1,7 @@
 #include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
+//#include <stddef.h>
+//#include <stdint.h>
+//#include <stdio.h>
 
 //#include <arch/i386/tmtty.h>
 //#include <arch/i386/ps2_controller.h>

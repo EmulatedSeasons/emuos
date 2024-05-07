@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <stdint.h>
 #include <stddef.h>
 #include "limine.h"
@@ -37,6 +36,7 @@ void hcf() {
 extern void (*__init_array[])();
 extern void (*__init_array_end[])();
 
+extern "C" void kernel_main();
 
 extern "C" void _start() {
     if (!LIMINE_BASE_REVISION_SUPPORTED) {
@@ -58,10 +58,12 @@ extern "C" void _start() {
     limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
 
     // Note: we assume the framebuffer model is RGB with 32-bit pixels.
-    for (std::size_t i = 0; i < 100; i++) {
+    for (size_t i = 0; i < 100; i++) {
         volatile uint32_t *fb_ptr = static_cast<volatile uint32_t *>(framebuffer->address);
         fb_ptr[i * (framebuffer->pitch / 4) + i] = 0xffffff;
     }
+
+
 
     // We're done, just hang...
     hcf();

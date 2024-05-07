@@ -1,4 +1,4 @@
-# libck makefile
+# libc makefile
 
 ifndef AR
 	AR = i686-elf-ar
@@ -71,7 +71,7 @@ libc.a: ${OBJECTS}
 install-headers:
 	cp -r --preserve=timestamps include/. $(SYSROOT)/usr/include
 
-install-lib: libck.a
+install-lib: libc.a
 	cp -r $< $(SYSROOT)/usr/lib/.
 
 clean:
