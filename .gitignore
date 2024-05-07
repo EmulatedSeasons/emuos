@@ -19,5 +19,6 @@ misc/
 
 # not important
 make.png
+.clangd
 
 .vscode/

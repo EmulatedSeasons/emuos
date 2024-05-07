@@ -22,11 +22,11 @@ build-all: kernel/kernel.bin libc/libc.a
 
 libc/libc.a: install-headers
 	$(info [INFO] Building libc)
-	$(MAKE) -C ./libc/ ARCH=$(ARCH) PREFIX=$(PWD)
+	$(MAKE) -C ./libc/ all
 
 kernel/kernel.bin: libc/libc.a install-headers
 	$(info [INFO] Building kernel)
-	$(MAKE) -C ./kernel/ ARCH=$(ARCH) PREFIX=$(PWD)
+	$(MAKE) -C ./kernel/ all
 
 limine: build-all
 	cp kernel/kernel.bin isodir/boot

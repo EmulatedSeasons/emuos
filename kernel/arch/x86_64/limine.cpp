@@ -1,6 +1,9 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <arch/x86_64/serial.h>
 #include "limine.h"
+#include <framebuffer.h>
 
 namespace {
 __attribute__((used, section(".requests")))
@@ -63,7 +66,12 @@ extern "C" void _start() {
         fb_ptr[i * (framebuffer->pitch / 4) + i] = 0xffffff;
     }
 
+    Framebuffer fb((uint32_t*)framebuffer->address, framebuffer->width, framebuffer->height);
+    fb.drawpixel(727, 727, 0x9528fd);
 
+    printf("video modes: %lx", framebuffer->mode_count);
+
+    kernel_main();
 
     // We're done, just hang...
     hcf();

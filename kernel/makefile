@@ -1,8 +1,11 @@
 # Kernel makefile
 
-CFLAGS := -ffreestanding -Wall -Wextra -g -std=gnu99 -O2 -Iinclude --sysroot=$(SYSROOT)
-CXXFLAGS := -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -g -O2 -Iinclude --sysroot=$(SYSROOT)
-LDFLAGS := -T arch/$(ARCH)/linker.ld -ffreestanding -g -O2 -Iinclude --sysroot=$(SYSROOT)
+CFLAGS := -ffreestanding -Wall -Wextra -g -std=gnu99 -O2 -Iinclude --sysroot=$(SYSROOT) \
+	-isystem="/usr/include"
+CXXFLAGS := -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -g -O2 -Iinclude --sysroot=$(SYSROOT) \
+	-isystem="/usr/include"
+LDFLAGS := -T arch/$(ARCH)/linker.ld -ffreestanding -g -O2 -Iinclude --sysroot=$(SYSROOT) \
+	-isystem="/usr/include"
 ASMFLAGS :=
 
 ifeq ($(ARCH),x86_64)
@@ -21,7 +24,7 @@ LIBS = -nostdlib -lc -lgcc
 #Find all the source files
 CPP_SRCS := $(shell find . -type f -name '*.cpp' -not -path './arch/*') \
 	$(shell find $(PWD)/kernel/arch/$(ARCH) -type f -name '*.cpp')
-#HEADERS := $(shell find $(PWD) -type f -name '*.h')
+HEADERS := $(shell find ./include -type f -name '*.h')
 #ASMFILES := $(shell find $(PWD) -type f -name '*.asm' -prune $(PWD)/arch) \
 	$(shell find $(PWD)/kernel/arch/$(ARCH) -type f -name '*.asm')
 
@@ -50,11 +53,11 @@ kernel.bin: ${OBJS}
 	$(CXX) ${LDFLAGS} -o $@ $(LINKLST)
 
 %.o: %.cpp
-	$(info [INFO] Compiling $<)
+#	$(info [INFO] Compiling $<)
 	$(CXX) ${CXXFLAGS} -MMD -MP -c $< -o $@
 
 %.o: %.c
-	$(info [INFO] Compiling $<)
+#	$(info [INFO] Compiling $<)
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
 %.o: %.asm
@@ -67,9 +70,9 @@ kernel.bin: ${OBJS}
 # crtn.o: 
 # 	$(NASM) arch/$(ARCH)/crtn.asm $(ASMFLAGS) -o $@
 
-install-headers:
+install-headers: $(HEADERS)
 	cp -r --preserve=timestamps include/. $(SYSROOT)/usr/include
 
 clean:
 	$(info [INFO] Cleaning)
-	$(RM) ${OBJS} $(DEPFILES)
+	$(RM) ${OBJS} $(DEPFILES) kernel.bin
