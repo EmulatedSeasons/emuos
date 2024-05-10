@@ -25,7 +25,7 @@ LIBS = -nostdlib -lc -lgcc
 CPP_SRCS := $(shell find . -type f -name '*.cpp' -not -path './arch/*') \
 	$(shell find $(PWD)/kernel/arch/$(ARCH) -type f -name '*.cpp')
 HEADERS := $(shell find ./include -type f -name '*.h')
-#ASMFILES := $(shell find $(PWD) -type f -name '*.asm' -prune $(PWD)/arch) \
+ASMFILES := $(shell find . -type f -name '*.asm' -not -path './arch/*') \
 	$(shell find $(PWD)/kernel/arch/$(ARCH) -type f -name '*.asm')
 
 #OBJS := $(patsubst %.c,%.o,$(C_SOURCES))

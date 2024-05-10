@@ -3,16 +3,9 @@
 
 #include <stdint.h>
 
-class Framebuffer {
-    private:
-    uint32_t* addr;
-    const uint64_t width;
-    const uint64_t height;
-
-    public:
-    Framebuffer(uint32_t* addr, const uint64_t width, const uint64_t height);
-    void clear();
-    void drawpixel(const uint64_t x, const uint64_t y, const uint32_t color);
-};
+void fb_init(uint32_t* addr, uint64_t width, uint64_t height);
+void fb_clear();
+void draw_pixel(const uint64_t x, const uint64_t y, const uint32_t color);
+void draw_bitmap(const uint32_t* bitmap, const uint64_t x_pos, const uint64_t y_pos, const uint64_t width, const uint64_t height);
 
 #endif

@@ -60,13 +60,13 @@ struct idt_entry
     uint16_t offset_high;
 }__attribute__((packed));
 
-struct str_idtr {
+struct idtr {
     uint16_t limit;
     uint32_t base;
 }__attribute__((packed));
 
 idt_entry idt[256];
-str_idtr idtr;
+idtr idtr;
 
 void idt_new_entry(int num, uint32_t offset, uint16_t sel, uint8_t type_attribs) {
     idt[num].offset_low = (offset & 0xFFFF);
