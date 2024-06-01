@@ -3,15 +3,16 @@
 CFLAGS := -ffreestanding -Wall -Wextra -g -std=gnu99 -O2 -Iinclude --sysroot=$(SYSROOT) \
 	-isystem="/usr/include"
 CXXFLAGS := -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -g -O2 -Iinclude --sysroot=$(SYSROOT) \
-	-isystem="/usr/include"
+	-isystem="/usr/include" -std=gnu++20
 LDFLAGS := -T arch/$(ARCH)/linker.ld -ffreestanding -g -O2 -Iinclude --sysroot=$(SYSROOT) \
 	-isystem="/usr/include"
 ASMFLAGS :=
 
 ifeq ($(ARCH),x86_64)
-CFLAGS += -mno-red-zone -mcmodel=kernel -mno-sse -mno-sse2 -mno-mmx
-CXXFLAGS += -mno-red-zone -mcmodel=kernel -mno-sse -mno-sse2 -mno-mmx
-LDFLAGS += -mno-red-zone -mcmodel=kernel -mno-sse -mno-sse2 -mno-mmx
+CFLAGS += -mno-red-zone -mcmodel=kernel -mno-80387 -mno-sse -mno-sse2 -mno-mmx
+CXXFLAGS += -mno-red-zone -mcmodel=kernel -mno-80387 -mno-sse -mno-sse2 -mno-mmx
+LDFLAGS += -mno-red-zone -mcmodel=kernel -mno-80387 -mno-sse -mno-sse2 -mno-mmx \
+	-z max-page-size=0x1000
 ASMFLAGS += -felf64
 endif
 

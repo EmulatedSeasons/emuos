@@ -34,10 +34,11 @@ limine: build-all
         -no-emul-boot -boot-load-size 4 -boot-info-table \
         --efi-boot boot/limine/limine-uefi-cd.bin \
         -efi-boot-part --efi-boot-image --protective-msdos-label \
-        isodir -o emuos.iso
+        isodir -o $(OS_NAME).iso
+	limine bios-install $(OS_NAME).iso
 
 qemu: limine
-	$(QEMU) -no-shutdown -no-reboot --serial stdio -s -m 512 -hda $(OS_NAME).iso
+	$(QEMU) -no-shutdown -no-reboot --serial stdio -s -m 1024 -hda $(OS_NAME).iso
 
 install: install-headers install-libraries
 

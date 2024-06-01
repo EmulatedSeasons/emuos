@@ -12,7 +12,7 @@ unsigned int _kernel_begin;
 unsigned int _kernel_end;
 
 
-extern "C" void kernel_main(void) {
+void kernel_main(void) {
     // Initialize terminal
     //terminal_initialize();
 
