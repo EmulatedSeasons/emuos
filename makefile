@@ -1,50 +1,55 @@
 # The makefile
 
-OS_NAME		:= emuos
-ARCH		= i386
-SYSROOT = $(PWD)/sysroot
+OS_NAME			:= emuos
+export ARCH		?= x86_64
+export SYSROOT 	= $(PWD)/sysroot
 
 # Variables for easy access of tools like gcc and nasm
-CC		= i686-elf-gcc
-CXX		= i686-elf-g++
-LD		= i686-elf-ld 
-NASM		= nasm
-QEMU		= qemu-system-i386
-ASMFLAGS	= -felf32
+export CC		= $(ARCH)-elf-gcc
+export CXX		= $(ARCH)-elf-g++
+export AR		= $(ARCH)-elf-ar
+export NASM		= nasm
+QEMU			= qemu-system-$(ARCH)
+#ASMFLAGS	= -felf32
 #CXXFLAGS 	:= -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti
 #LDFLAGS	:= -ffreestanding -O2 -nostdlib 
 
-.PHONY: all kernel.bin grub multiboot_test clean
+.PHONY: all limine clean build-all
 
-all: libck.a kernel.bin grub
+all: build-all limine
 
-libck.a:
-	$(info [INFO] Building libck)
-	$(MAKE) -C ./libs/libck/ ARCH=$(ARCH) PREFIX=$(PWD) CC=$(CC) CXX=$(CXX) LD=$(LD) NASM=$(NASM) SYSROOT=$(SYSROOT)
+build-all: kernel/kernel.bin libc/libc.a
 
-kernel.bin:
+libc/libc.a: install-headers
+	$(info [INFO] Building libc)
+	$(MAKE) -C ./libc/ all
+
+kernel/kernel.bin: libc/libc.a install-headers
 	$(info [INFO] Building kernel)
-	$(MAKE) -C ./kernel/ ARCH=$(ARCH) PREFIX=$(PWD) CC=$(CC) CXX=$(CXX) LD=$(LD) NASM=$(NASM) SYSROOT=$(SYSROOT)
+	$(MAKE) -C ./kernel/ all
 
-grub: kernel.bin grub.cfg
-	grub-file --is-x86-multiboot $<
-	cp kernel.bin isodir/boot
-	cp grub.cfg isodir/boot/grub
-	grub-mkrescue -o $(OS_NAME).iso isodir
+limine: build-all
+	cp kernel/kernel.bin isodir/boot
+	xorriso -as mkisofs -b boot/limine/limine-bios-cd.bin \
+        -no-emul-boot -boot-load-size 4 -boot-info-table \
+        --efi-boot boot/limine/limine-uefi-cd.bin \
+        -efi-boot-part --efi-boot-image --protective-msdos-label \
+        isodir -o $(OS_NAME).iso
+	limine bios-install $(OS_NAME).iso
 
-qemu: grub
-	$(QEMU) -no-shutdown -no-reboot --serial stdio -s -m 512 -hda $(OS_NAME).iso
+qemu: limine
+	$(QEMU) -no-shutdown -no-reboot --serial stdio -s -m 1024 -hda $(OS_NAME).iso
 
 install: install-headers install-libraries
 
 install-headers:
-	$(MAKE) -C ./kernel/ install-headers SYSROOT=$(SYSROOT)
-	$(MAKE) -C ./libs/libck/ install-headers SYSROOT=$(SYSROOT)
+	$(MAKE) -C ./kernel/ install-headers
+	$(MAKE) -C ./libc/ install-headers
 
 install-libraries:
-		$(MAKE) -C ./libs/libck/ install-lib SYSROOT=$(SYSROOT)
+	$(MAKE) -C ./libc/ install-lib
 
 clean:
-	-@$(MAKE) -C ./kernel/ clean SYSROOT=$(SYSROOT)
-	-@$(MAKE) -C ./libs/libck/ clean SYSROOT=$(SYSROOT)
+	-@$(MAKE) -C ./kernel/ clean
+	-@$(MAKE) -C ./libc/ clean
 	-@$(RM) $(wildcard *.bin *.a)

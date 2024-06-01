@@ -1,2 +1,2 @@
 @echo off
-qemu-system-i386 -m 128 -drive format=raw,media=cdrom,file=emuos.iso
+qemu-system-x86_64 -m 128 -drive format=raw,media=cdrom,file=emuos.iso -serial stdio -no-reboot -no-shutdown

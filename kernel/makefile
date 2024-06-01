@@ -1,89 +1,79 @@
 # Kernel makefile
 
-ifndef GAS
-	GAS = i686-elf-as
-endif
+CFLAGS := -ffreestanding -Wall -Wextra -g -std=gnu99 -O2 -Iinclude --sysroot=$(SYSROOT) \
+	-isystem="/usr/include"
+CXXFLAGS := -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -g -O2 -Iinclude --sysroot=$(SYSROOT) \
+	-isystem="/usr/include" -std=gnu++20
+LDFLAGS := -T arch/$(ARCH)/linker.ld -ffreestanding -g -O2 -Iinclude --sysroot=$(SYSROOT) \
+	-isystem="/usr/include"
+ASMFLAGS :=
 
-ifndef CFLAGS
-	CFLAGS = -ffreestanding -Wall -Wextra -g -std=gnu99 -O2 -Iinclude
-	CFLAGS += --sysroot="$(SYSROOT)"
-	CFLAGS += -isystem="/usr/include"
-endif
-
-ifndef CXXFLAGS
-	CXXFLAGS = -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -D__is_kernel -g -O2 -Iinclude
-	CXXFLAGS += -Iinclude
-	CXXFLAGS += --sysroot="$(SYSROOT)"
-	CXXFLAGS += -isystem="/usr/include"
-endif
-
-ifndef LDFLAGS
-	LDFLAGS = -T arch/$(ARCH)/linker.ld -ffreestanding -g -O2 -Iinclude
-	LDFLAGS += --sysroot="$(SYSROOT)"
-	LDFLAGS += -isystem="/usr/include"
+ifeq ($(ARCH),x86_64)
+CFLAGS += -mno-red-zone -mcmodel=kernel -mno-80387 -mno-sse -mno-sse2 -mno-mmx
+CXXFLAGS += -mno-red-zone -mcmodel=kernel -mno-80387 -mno-sse -mno-sse2 -mno-mmx
+LDFLAGS += -mno-red-zone -mcmodel=kernel -mno-80387 -mno-sse -mno-sse2 -mno-mmx \
+	-z max-page-size=0x1000
+ASMFLAGS += -felf64
 endif
 
 ifndef SYSROOT
 	$(error No sysroot specified)
 endif
 
-
-LIBS = -nostdlib -lgcc -lck
+LIBS = -nostdlib -lc -lgcc
 
 #Find all the source files
-C_SOURCES := $(shell find $(PWD)/kernel -type f -name '*.c')
-CPP_SOURCES := $(shell find $(PWD)/kernel -type f -name '*.cpp')
-HEADERS := $(shell find $(PWD) -type f -name '*.h')
-ASMFILES := $(shell find $(PWD) -type f -name '*.asm' ! -name 'crti.asm' ! -name 'crtn.asm')
-GASFILES := $(wildcard *.s)
-CRTBEGIN := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtbegin.o)
-CRTEND := $(shell $(CXX) $(CXXFLAGS) -print-file-name=crtend.o)
+CPP_SRCS := $(shell find . -type f -name '*.cpp' -not -path './arch/*') \
+	$(shell find $(PWD)/kernel/arch/$(ARCH) -type f -name '*.cpp')
+HEADERS := $(shell find ./include -type f -name '*.h')
+ASMFILES := $(shell find . -type f -name '*.asm' -not -path './arch/*') \
+	$(shell find $(PWD)/kernel/arch/$(ARCH) -type f -name '*.asm')
 
-OBJECTS := $(patsubst %.c,%.o,$(C_SOURCES))
-OBJECTS += $(patsubst %.cpp,%.o,$(CPP_SOURCES))
-OBJECTS += $(patsubst %.asm,%.o,$(ASMFILES))
+#OBJS := $(patsubst %.c,%.o,$(C_SOURCES))
+OBJS := $(patsubst %.cpp,%.o,$(CPP_SRCS))
+OBJS += $(patsubst %.asm,%.o,$(ASMFILES))
 
-DEPFILES := $(patsubst %.c,%.d,$(C_SOURCES))
-DEPFILES += $(patsubst %.cpp,%.d,$(CPP_SOURCES))
+#DEPFILES := $(patsubst %.c,%.d,$(C_SOURCES))
+DEPFILES := $(patsubst %.cpp,%.d,$(CPP_SRCS))
 
-LINKLST := crti.o
-LINKLST += $(CRTBEGIN)
-LINKLST += $(OBJECTS)
+# LINKLST := crti.o
+# LINKLST += $(CRTBEGIN)
+LINKLST += $(OBJS)
 LINKLST += $(LIBS)
-LINKLST += $(CRTEND)
-LINKLST += crtn.o
+# LINKLST += $(CRTEND)
+# LINKLST += crtn.o
 
 -include $(DEPFILES)
 
-.PHONY: all crt clean kernel.bin
+.PHONY: all clean
 
-all: crti.o crtn.o kernel.bin
+all: kernel.bin
 
-kernel.bin: ${OBJECTS}
+kernel.bin: ${OBJS}
 	$(info [INFO] Linking kernel)
-	$(CXX) ${LDFLAGS} -o ${PREFIX}/kernel.bin $(LINKLST)
+	$(CXX) ${LDFLAGS} -o $@ $(LINKLST)
 
 %.o: %.cpp
-	$(info [INFO] Compiling $<)
+#	$(info [INFO] Compiling $<)
 	$(CXX) ${CXXFLAGS} -MMD -MP -c $< -o $@
 
 %.o: %.c
-	$(info [INFO] Compiling $<)
+#	$(info [INFO] Compiling $<)
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
 %.o: %.asm
 	$(info [INFO] Assembling $<)
-	$(NASM) $< -felf32 -o $@ -g
+	$(NASM) $< $(ASMFLAGS) -o $@ -g
 
-crti.o: 
-	$(NASM) arch/$(ARCH)/crti.asm -felf32 -o $@
+# crti.o: 
+# 	$(NASM) arch/$(ARCH)/crti.asm $(ASMFLAGS) -o $@
 
-crtn.o: 
-	$(NASM) arch/$(ARCH)/crtn.asm -felf32 -o $@
+# crtn.o: 
+# 	$(NASM) arch/$(ARCH)/crtn.asm $(ASMFLAGS) -o $@
 
-install-headers:
+install-headers: $(HEADERS)
 	cp -r --preserve=timestamps include/. $(SYSROOT)/usr/include
 
 clean:
 	$(info [INFO] Cleaning)
-	$(RM) ${OBJECTS} $(DEPFILES) crti.o crtn.o
+	$(RM) ${OBJS} $(DEPFILES) kernel.bin

@@ -1,4 +1,4 @@
-# libck makefile
+# libc makefile
 
 ifndef AR
 	AR = i686-elf-ar
@@ -6,21 +6,21 @@ endif
 
 ifndef CFLAGS
 	CFLAGS = -ffreestanding -Wall -Wextra -g -std=gnu11 -O2 -Iinclude
-	CFLAGS += --sysroot="$(SYSROOT)"
-	CFLAGS += -isystem="/usr/include"
+	CFLAGS += --sysroot=$(SYSROOT)
+	CFLAGS += -isystem $(SYSROOT)/usr/include
 endif
 
 ifndef CXXFLAGS
 	CXXFLAGS = -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -D__is_kernel -g -O2 -Iinclude
 	CXXFLAGS += -Iinclude
-	CXXFLAGS += --sysroot="$(SYSROOT)"
-	CXXFLAGS += -isystem="/usr/include"
+	CXXFLAGS += --sysroot=$(SYSROOT)
+	CXXFLAGS += -isystem $(SYSROOT)/usr/include
 endif
 
 ifndef LDFLAGS
 	LDFLAGS = -T arch/$(ARCH)/linker.ld -ffreestanding -g -O2 -Iinclude
-	LDFLAGS += --sysroot="$(SYSROOT)"
-	LDFLAGS += -isystem="/usr/include"
+	LDFLAGS += --sysroot=$(SYSROOT)
+	LDFLAGS += -isystem $(SYSROOT)/usr/include
 endif
 
 ifndef SYSROOT
@@ -50,9 +50,9 @@ LINKLST += $(LIBS)
 
 .PHONY: all install-headers install-lib clean
 
-all: libck.a install-headers install-lib
+all: libc.a install-lib
 
-libck.a: ${OBJECTS}
+libc.a: ${OBJECTS}
 	$(info [INFO] Linking $<)
 	$(AR) rcs $@ $(OBJECTS)
 
@@ -71,9 +71,9 @@ libck.a: ${OBJECTS}
 install-headers:
 	cp -r --preserve=timestamps include/. $(SYSROOT)/usr/include
 
-install-lib: libck.a
+install-lib: libc.a
 	cp -r $< $(SYSROOT)/usr/lib/.
 
 clean:
 	$(info [INFO] Cleaning)
-	$(RM) ${OBJECTS} $(DEPFILES)
+	$(RM) ${OBJECTS} $(DEPFILES) libc.a

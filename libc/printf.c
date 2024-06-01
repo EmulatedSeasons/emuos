@@ -37,10 +37,14 @@ static const char* itoa(unsigned int num, char* str, unsigned int base) {
 	}
 	
 	// reverse the string
-	for (int i = 0; i < cou; i++) {
-		char temp = str[i];
-		str[i] = str[cou - i - 1]; 
-		str[cou - 1] = temp;
+	size_t start = 0;
+	size_t end = cou - 1;
+	while (start < end) {
+		char temp = str[start];
+		str[start] = str[end];
+		str[end] = temp;
+		++start;
+		--end;
 	}
 
 	str[cou] = '\0';
@@ -49,7 +53,7 @@ static const char* itoa(unsigned int num, char* str, unsigned int base) {
 
 // have no idea if there's a better way to do this. for %lx
 static const char* itoa_u64(unsigned long long num, char* str, int base) {
-	int cou = 0; // nt
+	size_t cou = 0; // nt
 
     if (num == 0) { // 0
 		str[cou] = '0';
@@ -71,10 +75,14 @@ static const char* itoa_u64(unsigned long long num, char* str, int base) {
 	}
 	
 	// reverse the string
-	for (int i = 0; i < cou; i++) {
-		char temp = str[i];
-		str[i] = str[cou - i - 1]; 
-		str[cou - 1] = temp;
+	size_t start = 0;
+	size_t end = cou - 1;
+	while (start < end) {
+		char temp = str[start];
+		str[start] = str[end];
+		str[end] = temp;
+		++start;
+		--end;
 	}
 
 	str[cou] = '\0';

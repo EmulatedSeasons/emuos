@@ -1,7 +1,7 @@
 # directories that have to exist but shouldn't be added to git
-isodir/
 sysroot/
 build/
+isodir/
 
 # compiled files files
 *.bin
@@ -9,12 +9,16 @@ build/
 *.o
 *.d
 *.a
+*.sys
+*.efi
 
 # i have no idea what this is for
 bx_enh_dbg.ini
 
-# temporarily ignored cause i have no idea how to set up cmake with this and dont really have much else to use it for yet
 misc/
 
 # not important
 make.png
+.clangd
+
+.vscode/
