@@ -5,8 +5,17 @@
 #include <stddef.h>
 #include <limine.h>
 
-struct pmm_list_node {
-    pmm_list_node* next;
+struct MemRegion {
+    uint64_t base;
+    uint64_t length;
+    uint64_t bitmap_pos; // where the region starts on the bitmap index
+};
+
+struct BitmapInfo {
+    uint64_t* address;
+    uint64_t ind_length;
+    int region_count;
+    MemRegion* regions[];
 };
 
 void pmm_init(limine_memmap_response* memmap);
