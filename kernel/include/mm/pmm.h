@@ -5,23 +5,12 @@
 #include <stddef.h>
 #include <limine.h>
 
-enum mm_type {
-    MEM_USABLE,
-    MEM_RESERVED
+struct pmm_list_node {
+    pmm_list_node* next;
 };
 
-struct MMEntry {
-    uint64_t base;
-    uint64_t length;
-    mm_type type;
-};
-
-struct PBitmap {
-    uint64_t* addr;
-    size_t size;
-    MMEntry entry;
-};
-
-void pmm_init(limine_memmap_response* memmap, uint64_t hhdm_offset);
+void pmm_init(limine_memmap_response* memmap);
+void* palloc();
+void pfree(void* page);
 
 #endif

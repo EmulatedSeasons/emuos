@@ -1,11 +1,11 @@
 # Kernel makefile
 
 CFLAGS := -ffreestanding -Wall -Wextra -g -std=gnu99 -O2 -Iinclude --sysroot=$(SYSROOT) \
-	-isystem="/usr/include"
+	-isystem $(SYSROOT)/usr/include
 CXXFLAGS := -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -g -O2 -Iinclude --sysroot=$(SYSROOT) \
-	-isystem="/usr/include" -std=gnu++20
+	-isystem $(SYSROOT)/usr/include -std=gnu++20
 LDFLAGS := -T arch/$(ARCH)/linker.ld -ffreestanding -g -O2 -Iinclude --sysroot=$(SYSROOT) \
-	-isystem="/usr/include"
+	-isystem $(SYSROOT)/usr/include
 ASMFLAGS :=
 
 ifeq ($(ARCH),x86_64)

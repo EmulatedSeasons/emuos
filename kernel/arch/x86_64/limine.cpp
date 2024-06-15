@@ -62,11 +62,16 @@ extern void (*__init_array_end[])();
 
 void kernel_main();
 
+// this will cause problems later
+uint64_t _hhdm_offset;
+
 extern "C" void _start() {
     asm("cli");
     if (!LIMINE_BASE_REVISION_SUPPORTED) {
         hcf();
     }
+
+    _hhdm_offset = hhdm_request.response->offset;
 
     // setup gdt
     SegDesc segs[5];
@@ -129,10 +134,15 @@ extern "C" void _start() {
         memmap->entries[i]->base, memmap->entries[i]->length, memmap->entries[i]->type);
     }
 
-    // broken printf mirroring 64 bit values for some reason
-    //uint64_t tester = 0xFFFE0000000000AE + 1;
-    //printf("aaaa: %lx\n", tester);
-    pmm_init(memmap_request.response, hhdm_request.response->offset);
+    printf("hhdm offset: %lx\n", _hhdm_offset);
+    // pmm_init(memmap_request.response);
+    
+    // asm("xchgw %bx, %bx");
+    // uint64_t pmm_test[5];
+    // for (size_t i = 0; i < 5; i++) {
+    //     pmm_test[i] = (uint64_t)palloc();
+    //     printf("Alloc %d: %lx\n", i, pmm_test[i]);
+    // }
 
     kernel_main();
 
