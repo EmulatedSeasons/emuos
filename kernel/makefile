@@ -1,6 +1,6 @@
 # Kernel makefile
 
-CFLAGS := -ffreestanding -Wall -Wextra -g -std=gnu99 -O2 -Iinclude --sysroot=$(SYSROOT) \
+CFLAGS := -ffreestanding -Wall -Wextra -g -std=gnu11 -O2 -Iinclude --sysroot=$(SYSROOT) \
 	-isystem $(SYSROOT)/usr/include
 CXXFLAGS := -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -g -O2 -Iinclude --sysroot=$(SYSROOT) \
 	-isystem $(SYSROOT)/usr/include -std=gnu++20

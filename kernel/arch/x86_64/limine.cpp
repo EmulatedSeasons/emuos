@@ -135,14 +135,9 @@ extern "C" void _start() {
     }
 
     printf("hhdm offset: %lx\n", _hhdm_offset);
-    // pmm_init(memmap_request.response);
+    pmm_init(memmap_request.response);
     
-    // asm("xchgw %bx, %bx");
-    // uint64_t pmm_test[5];
-    // for (size_t i = 0; i < 5; i++) {
-    //     pmm_test[i] = (uint64_t)palloc();
-    //     printf("Alloc %d: %lx\n", i, pmm_test[i]);
-    // }
+    
 
     kernel_main();
 

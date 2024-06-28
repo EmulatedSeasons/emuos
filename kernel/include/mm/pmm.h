@@ -5,21 +5,15 @@
 #include <stddef.h>
 #include <limine.h>
 
-struct MemRegion {
-    uint64_t base;
+struct Bitmap {
+    Bitmap* next;
     uint64_t length;
-    uint64_t bitmap_pos; // where the region starts on the bitmap index
-};
-
-struct BitmapInfo {
+    uint64_t limit;
     uint64_t* address;
-    uint64_t ind_length;
-    int region_count;
-    MemRegion* regions[];
 };
 
 void pmm_init(limine_memmap_response* memmap);
-void* palloc();
-void pfree(void* page);
+uint64_t palloc();
+void pfree(uint64_t page);
 
 #endif

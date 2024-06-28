@@ -20,5 +20,6 @@ misc/
 # not important
 make.png
 .clangd
+.gdbinit
 
 .vscode/
