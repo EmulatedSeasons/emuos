@@ -20,20 +20,22 @@ ifndef SYSROOT
 	$(error No sysroot specified)
 endif
 
-LIBS = -nostdlib -lc -lgcc
+LIBS = -nostdlib -lgcc
 
 #Find all the source files
+C_SRCS := $(shell find . -type f -name '*.c' -not -path './arch/*') \
+	$(shell find $(PWD)/kernel/arch/$(ARCH) -type f -name '*.c')
 CPP_SRCS := $(shell find . -type f -name '*.cpp' -not -path './arch/*') \
 	$(shell find $(PWD)/kernel/arch/$(ARCH) -type f -name '*.cpp')
 HEADERS := $(shell find ./include -type f -name '*.h')
 ASMFILES := $(shell find . -type f -name '*.asm' -not -path './arch/*') \
 	$(shell find $(PWD)/kernel/arch/$(ARCH) -type f -name '*.asm')
 
-#OBJS := $(patsubst %.c,%.o,$(C_SOURCES))
-OBJS := $(patsubst %.cpp,%.o,$(CPP_SRCS))
+OBJS := $(patsubst %.c,%.o,$(C_SRCS))
+OBJS += $(patsubst %.cpp,%.o,$(CPP_SRCS))
 OBJS += $(patsubst %.asm,%.o,$(ASMFILES))
 
-#DEPFILES := $(patsubst %.c,%.d,$(C_SOURCES))
+DEPFILES := $(patsubst %.c,%.d,$(C_SOURCES))
 DEPFILES := $(patsubst %.cpp,%.d,$(CPP_SRCS))
 
 # LINKLST := crti.o
@@ -62,7 +64,7 @@ kernel.bin: ${OBJS}
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
 %.o: %.asm
-	$(info [INFO] Assembling $<)
+#	$(info [INFO] Assembling $<)
 	$(NASM) $< $(ASMFLAGS) -o $@ -g
 
 # crti.o: 
@@ -71,8 +73,8 @@ kernel.bin: ${OBJS}
 # crtn.o: 
 # 	$(NASM) arch/$(ARCH)/crtn.asm $(ASMFLAGS) -o $@
 
-install-headers: $(HEADERS)
-	cp -r --preserve=timestamps include/. $(SYSROOT)/usr/include
+# install-headers: $(HEADERS)
+# 	cp -r --preserve=timestamps include/. $(SYSROOT)/usr/include
 
 clean:
 	$(info [INFO] Cleaning)

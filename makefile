@@ -18,13 +18,9 @@ QEMU			= qemu-system-$(ARCH)
 
 all: build-all limine
 
-build-all: kernel/kernel.bin libc/libc.a
+build-all: kernel/kernel.bin
 
-libc/libc.a: install-headers
-	$(info [INFO] Building libc)
-	$(MAKE) -C ./libc/ all
-
-kernel/kernel.bin: libc/libc.a install-headers
+kernel/kernel.bin:
 	$(info [INFO] Building kernel)
 	$(MAKE) -C ./kernel/ all
 
@@ -40,16 +36,15 @@ limine: build-all
 qemu: limine
 	$(QEMU) -no-shutdown -no-reboot --serial stdio -s -m 1024 -hda $(OS_NAME).iso
 
-install: install-headers install-libraries
+# install: install-headers install-libraries
 
-install-headers:
-	$(MAKE) -C ./kernel/ install-headers
-	$(MAKE) -C ./libc/ install-headers
+# install-headers:
+# 	$(MAKE) -C ./kernel/ install-headers
+# 	$(MAKE) -C ./libc/ install-headers
 
-install-libraries:
-	$(MAKE) -C ./libc/ install-lib
+# install-libraries:
+# 	$(MAKE) -C ./libc/ install-lib
 
 clean:
 	-@$(MAKE) -C ./kernel/ clean
-	-@$(MAKE) -C ./libc/ clean
 	-@$(RM) $(wildcard *.bin *.a)
