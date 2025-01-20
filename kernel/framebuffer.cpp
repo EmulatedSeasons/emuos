@@ -8,7 +8,7 @@ uint32_t fb_height;
 
 void fb_init(uint32_t* addr, uint32_t width, uint32_t height) {
     fb_addr = addr;
-    fb_width = width;
+    fb_width = width / 4;
     fb_height = height;
     fb_clear();
 }

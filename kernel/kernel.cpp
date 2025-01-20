@@ -1,25 +1,124 @@
-#include <stdbool.h>
-//#include <stddef.h>
-//#include <stdint.h>
-//#include <stdio.h>
+#include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <arch/x86_64/serial.h>
+#include <limine.h>
+#include <framebuffer.h>
+#include <mm/pmm.h>
+#include <arch/arch_init.h>
 
-//#include <arch/i386/tmtty.h>
-//#include <arch/i386/ps2_controller.h>
-//#include <dev/ps2kbd.h>
+namespace {
+__attribute__((used, section(".requests")))
+volatile LIMINE_BASE_REVISION(2);
+}
+
+namespace {
+__attribute__((used, section(".requests")))
+volatile limine_framebuffer_request framebuffer_request = {
+    .id = LIMINE_FRAMEBUFFER_REQUEST,
+    .revision = 0,
+    .response = nullptr
+};
+}
+
+namespace {
+__attribute__((used, section(".requests")))
+volatile limine_memmap_request memmap_request = {
+    .id = LIMINE_MEMMAP_REQUEST,
+    .revision = 0,
+    .response = nullptr  
+};
+}
+
+namespace {
+__attribute__((used, section(".requests")))
+volatile limine_hhdm_request hhdm_request = {
+    .id = LIMINE_HHDM_REQUEST,
+    .revision = 0,
+    .response = nullptr  
+};
+}
+
+namespace {
+__attribute__((used, section(".requests_start_marker")))
+volatile LIMINE_REQUESTS_START_MARKER;
+
+__attribute__((used, section(".requests_end_marker")))
+volatile LIMINE_REQUESTS_END_MARKER;
+}
+
+namespace {
+[[noreturn]] void hcf() {
+    asm("cli");
+    for (;;) {
+        asm("hlt");
+    }
+}
+}
+
+extern void (*__init_array[])();
+extern void (*__init_array_end[])();
 
 // linker symbols
-unsigned int _kernel_begin;
-unsigned int _kernel_end;
+uint64_t _kernel_begin;
+uint64_t _kernel_end;
 
+// this will cause problems later
+uint64_t _hhdm_offset;
 
-void kernel_main(void) {
-    // Initialize terminal
-    //terminal_initialize();
+extern "C" void _start() {
+    asm("cli");
+    if (!LIMINE_BASE_REVISION_SUPPORTED) {
+        hcf();
+    }
 
-    //initialize_ps2_controller();
-    //keyboard_init();
+    _hhdm_offset = hhdm_request.response->offset;
 
-    //printf("Hello world!\n");
-    //printf("a%db\n", 1);
-    //printf("_begin: %x, _end: %x", &_kernel_begin, &_kernel_end);
+    arch_init();
+
+    // initialize global constructors
+    for (size_t i = 0; &__init_array[i] != __init_array_end; i++) {
+        __init_array[i]();
+    }
+
+    // Ensure we got a framebuffer.
+    if (framebuffer_request.response == nullptr
+     || framebuffer_request.response->framebuffer_count < 1) {
+        hcf();
+    }
+
+    if (memmap_request.response == nullptr) {
+        hcf();
+    }
+
+    // Fetch the first framebuffer.
+    limine_framebuffer* framebuffer = framebuffer_request.response->framebuffers[0];
+
+    fb_init((uint32_t*)framebuffer->address, framebuffer->pitch, framebuffer->height);
+    draw_pixel(727, 727, 0x9528fd);
+    draw_pixel(0, 0, 0xff0000);
+    draw_pixel(framebuffer->width - 1, framebuffer->height - 1, 0x00ff00);
+    // for (size_t i = 0; i < framebuffer->mode_count; i++) {
+    //     printf("Mode %d\n", i);
+    //     printf("Pitch %d\nWidth %d\nHeight %d\nbpp %d\nmem_model %d\n",
+    //     framebuffer->modes[i]->pitch, framebuffer->modes[i]->width, framebuffer->modes[i]->height,
+    //     framebuffer->modes[i]->bpp, framebuffer->modes[i]->memory_model);
+    // }
+
+    printf("Actual framebuffer:\n");
+    printf("Pitch %d\nWidth %d\nHeight %d\nbpp %d\nmem_model %d\n",
+        framebuffer->pitch, framebuffer->width, framebuffer->height,
+        framebuffer->bpp, framebuffer->memory_model);
+    
+    limine_memmap_response* memmap = memmap_request.response;
+    for (int i = 0; i < memmap->entry_count; i++) {
+        printf("base: %lx\nlength: %lx\ntype: %d\n\n", 
+        memmap->entries[i]->base, memmap->entries[i]->length, memmap->entries[i]->type);
+    }
+
+    printf("hhdm offset: %lx\n", _hhdm_offset);
+    pmm_init(memmap_request.response);
+    
+    // We're done, just hang...
+    hcf();
 }
