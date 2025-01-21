@@ -9,7 +9,7 @@
 
 namespace {
 __attribute__((used, section(".requests")))
-volatile LIMINE_BASE_REVISION(2);
+volatile LIMINE_BASE_REVISION(3);
 }
 
 namespace {
@@ -98,12 +98,6 @@ extern "C" void _start() {
     draw_pixel(727, 727, 0x9528fd);
     draw_pixel(0, 0, 0xff0000);
     draw_pixel(framebuffer->width - 1, framebuffer->height - 1, 0x00ff00);
-    // for (size_t i = 0; i < framebuffer->mode_count; i++) {
-    //     printf("Mode %d\n", i);
-    //     printf("Pitch %d\nWidth %d\nHeight %d\nbpp %d\nmem_model %d\n",
-    //     framebuffer->modes[i]->pitch, framebuffer->modes[i]->width, framebuffer->modes[i]->height,
-    //     framebuffer->modes[i]->bpp, framebuffer->modes[i]->memory_model);
-    // }
 
     printf("Actual framebuffer:\n");
     printf("Pitch %d\nWidth %d\nHeight %d\nbpp %d\nmem_model %d\n",
@@ -118,6 +112,14 @@ extern "C" void _start() {
 
     printf("hhdm offset: %lx\n", _hhdm_offset);
     pmm_init(memmap_request.response);
+
+    uint64_t tester = page_alloc();
+    printf("tester: %lx\n", tester);
+    page_free(tester);
+    tester = page_alloc();
+    printf("tester: %lx\n", tester);
+    uint64_t tester2 = page_alloc();
+    printf("tester 2: %lx\n", tester2);
     
     // We're done, just hang...
     hcf();

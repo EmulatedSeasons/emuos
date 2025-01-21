@@ -34,7 +34,7 @@ limine: build-all
 	limine bios-install $(OS_NAME).iso
 
 qemu: limine
-	$(QEMU) -no-shutdown -no-reboot --serial stdio -s -m 1024 -hda $(OS_NAME).iso
+	$(QEMU) -no-shutdown -no-reboot --serial stdio -s -m 4096 -hda $(OS_NAME).iso
 
 # install: install-headers install-libraries
 
