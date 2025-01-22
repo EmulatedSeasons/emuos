@@ -112,6 +112,7 @@ extern "C" void _start() {
 
     printf("hhdm offset: %lx\n", _hhdm_offset);
     pmm_init(memmap_request.response);
+    draw_pixel(100, 100, 0x0000ff);
 
     uint64_t tester = page_alloc();
     printf("tester: %lx\n", tester);
